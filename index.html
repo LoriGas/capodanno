@@ -34,12 +34,12 @@
         /* --- STILE CARD "GLASSMORPHISM" --- */
         .card {
             background: var(--card-glass);
-            backdrop-filter: blur(15px); /* Effetto vetro sfocato */
+            backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             padding: 30px;
             border-radius: 20px;
             margin-bottom: 30px;
-            border: 1px solid rgba(255, 215, 0, 0.1); /* Bordino oro sottile */
+            border: 1px solid rgba(255, 215, 0, 0.1);
             box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
         }
 
@@ -48,7 +48,7 @@
             color: var(--gold);
             font-weight: 800;
             font-size: 2.5rem;
-            text-shadow: 0 0 15px var(--gold-glow); /* Testo luminoso */
+            text-shadow: 0 0 15px var(--gold-glow);
             margin-bottom: 10px;
         }
         h2 { text-align: center; font-weight: 600; margin-bottom: 30px; }
@@ -98,19 +98,19 @@
             border-radius: 12px; 
             text-align: center; 
             cursor: pointer; 
-            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); /* Transizione elastica */
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
             user-select: none;
             font-weight: 600;
             font-size: 0.9rem;
         }
         
         .checkbox-item input:checked ~ .checkmark {
-            background: linear-gradient(135deg, var(--gold), #b8962e); /* Gradiente oro */
+            background: linear-gradient(135deg, var(--gold), #b8962e);
             color: #000;
             font-weight: 800;
             border-color: transparent;
             box-shadow: 0 5px 20px var(--gold-glow);
-            transform: translateY(-3px); /* Si solleva quando cliccato */
+            transform: translateY(-3px);
         }
 
         /* --- BOTTONE SPAZIALE --- */
@@ -141,7 +141,7 @@
         @media(min-width: 700px) { .charts-container { grid-template-columns: 1fr 1fr; } }
         
         .chart-box {
-            background: rgba(0,0,0,0.3); /* Leggermente più scuro delle card */
+            background: rgba(0,0,0,0.3);
             padding: 20px;
             border-radius: 15px;
             min-height: 250px;
@@ -181,14 +181,14 @@
         <h2>Cosa ti versiamo?</h2>
         
         <label style="font-weight: 600; margin-left: 5px;">IL TUO NOME</label>
-        <input type="text" id="name" placeholder="Es. Mario il Devastatore" required>
+        <input type="text" id="name" placeholder="Es. Andrea (il fidanzato di Damir)" required>
         
         <h3>🥃 Superalcolici</h3>
         <div class="checkbox-group">
             <label class="checkbox-item"><input type="checkbox" name="drink" value="Gin"><span class="checkmark">Gin</span></label>
             <label class="checkbox-item"><input type="checkbox" name="drink" value="Vodka"><span class="checkmark">Vodka</span></label>
             <label class="checkbox-item"><input type="checkbox" name="drink" value="Rum"><span class="checkmark">Rum</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="drink" value="Whisky"><span class="checkmark">Whisky</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Martini"><span class="checkmark">Martini</span></label>
             <label class="checkbox-item"><input type="checkbox" name="drink" value="Amaro"><span class="checkmark">Amaro / Shot</span></label>
             <label class="checkbox-item"><input type="checkbox" name="drink" value="Tequila"><span class="checkmark">Tequila</span></label>
         </div>
@@ -216,7 +216,7 @@
             <option value="Standard">⚖️ Standard (Normale)</option>
             <option value="Premium">💎 Premium (Spendo di più)</option>
             <option value="Scrauso">📉 Scrauso (Max Risparmio)</option>
-            <option value="N/A">🤷 Non mi interessa / Solo Birra</option>
+            <option value="N/A">🤷 Non mi interessa</option>
         </select>
 
         <button onclick="submitVote()">CONFERMA LE SCELTE 🚀</button>
@@ -267,7 +267,6 @@
     // Inizializza Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    // Uso una nuova collection per i test con la nuova grafica
     const collectionName = "preferenze2026_v3_fighetto"; 
 
     // Funzione per inviare i dati
@@ -284,7 +283,6 @@
         if(!name) return alert("Ehy, inserisci il tuo nome!");
         if(selectedDrinks.length === 0) return alert("Non bevi nulla? Seleziona almeno l'acqua!");
 
-        // Effetto sul bottone durante l'invio
         const btn = document.querySelector('button');
         btn.innerText = "INVIO IN CORSO...";
         btn.style.opacity = "0.7";
@@ -297,7 +295,6 @@
         }).then(() => {
             document.getElementById('voteSection').classList.add('hidden');
             document.getElementById('dashboardSection').style.display = 'block';
-            // Scroll smooth verso la dashboard
             document.getElementById('dashboardSection').scrollIntoView({ behavior: 'smooth' });
         }).catch((error) => {
             console.error("Errore: ", error);
@@ -326,7 +323,6 @@
                 data.selections.forEach(item => {
                     itemCounts[item] = (itemCounts[item] || 0) + 1;
                 });
-                // Feed più carino con emoji casuali
                 const emojis = ['🥂', '🍾', '🥃', '🍸', '🍹', '🍺'];
                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                 feedHTML += `<li>${randomEmoji} <b>${data.name}</b> ha scelto: <span style="color:#fff">${data.selections.join(", ")}</span></li>`;
@@ -356,7 +352,6 @@
         const sortedKeys = Object.keys(itemData).sort((a,b) => itemData[b] - itemData[a]);
         const sortedValues = sortedKeys.map(key => itemData[key]);
 
-        // Grafico Barre Orizzontali
         if(chartDrink) chartDrink.destroy();
         chartDrink = new Chart(ctxD, {
             type: 'bar',
@@ -365,10 +360,10 @@
                 datasets: [{
                     label: 'Richieste',
                     data: sortedValues,
-                    backgroundColor: 'rgba(255, 215, 0, 0.8)', // Oro più brillante
+                    backgroundColor: 'rgba(255, 215, 0, 0.8)',
                     borderColor: '#ffd700',
                     borderWidth: 1,
-                    borderRadius: 5, // Barre arrotondate
+                    borderRadius: 5,
                     hoverBackgroundColor: '#fff'
                 }]
             },
@@ -387,7 +382,6 @@
             }
         });
 
-        // Grafico Torta Qualità
         if(chartQuality) chartQuality.destroy();
         chartQuality = new Chart(ctxQ, {
             type: 'doughnut',
