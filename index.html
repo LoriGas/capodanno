@@ -3,82 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capodanno Dashboard 📊</title>
+    <title>✨ Capodanno 2026 Party Hub ✨</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --gold: #d4af37; --text: #eee; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        
-        .container { max-width: 800px; margin: 0 auto; }
-        
-        /* Stile Form */
-        .card { background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h1, h2 { text-align: center; color: var(--gold); }
-        
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
-        
-        button { width: 100%; padding: 15px; background: var(--gold); color: #000; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1rem; margin-top: 10px; }
-        button:hover { filter: brightness(1.1); }
+        :root {
+            --bg-dark: #0a0a0a;
+            --card-glass: rgba(30, 30, 30, 0.6);
+            --gold: #ffd700;
+            --gold-glow: rgba(255, 215, 0, 0.5);
+            --text: #eee;
+            --input-bg: rgba(255, 255, 255, 0.05);
+        }
 
-        /* Stile Dashboard Grafici */
-        .charts-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media(min-width: 600px) { .charts-container { grid-template-columns: 1fr 1fr; } }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: radial-gradient(circle at top center, #2a2a2a 0%, var(--bg-dark) 80%);
+            color: var(--text);
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
         
-        .chart-box { background: #2c2c2c; padding: 15px; border-radius: 10px; min-height: 250px; }
+        .container { max-width: 850px; margin: 0 auto; }
         
-        /* Nascondi dashboard all'inizio se vuoi, oppure mostrala sempre */
-        #dashboardSection { display: none; animation: fadeIn 1s; }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- STILE CARD "GLASSMORPHISM" --- */
+        .card {
+            background: var(--card-glass);
+            backdrop-filter: blur(15px); /* Effetto vetro sfocato */
+            -webkit-backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.1); /* Bordino oro sottile */
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+        }
 
-        .stat-number { font-size: 2rem; font-weight: bold; text-align: center; color: var(--gold); margin: 0; }
-        .stat-label { text-align: center; font-size: 0.9rem; color: #aaa; margin-bottom: 15px; }
+        h1 {
+            text-align: center;
+            color: var(--gold);
+            font-weight: 800;
+            font-size: 2.5rem;
+            text-shadow: 0 0 15px var(--gold-glow); /* Testo luminoso */
+            margin-bottom: 10px;
+        }
+        h2 { text-align: center; font-weight: 600; margin-bottom: 30px; }
+        
+        h3 {
+            color: var(--gold);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding-bottom: 10px;
+            margin-top: 35px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
 
+        /* --- INPUT MODERNI --- */
+        input[type="text"], select {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 15px var(--gold-glow);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* --- CHECKBOX FIGHETTE --- */
+        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .checkbox-item { position: relative; }
+        .checkbox-item input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        
+        .checkmark { 
+            display: block; 
+            background-color: var(--input-bg);
+            padding: 15px 10px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); /* Transizione elastica */
+            user-select: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .checkbox-item input:checked ~ .checkmark {
+            background: linear-gradient(135deg, var(--gold), #b8962e); /* Gradiente oro */
+            color: #000;
+            font-weight: 800;
+            border-color: transparent;
+            box-shadow: 0 5px 20px var(--gold-glow);
+            transform: translateY(-3px); /* Si solleva quando cliccato */
+        }
+
+        /* --- BOTTONE SPAZIALE --- */
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, var(--gold), #eab308);
+            color: #000;
+            font-weight: 800;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-top: 35px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 25px var(--gold-glow);
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 40px var(--gold-glow);
+            filter: brightness(1.1);
+        }
+
+        /* --- DASHBOARD --- */
+        .charts-container { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media(min-width: 700px) { .charts-container { grid-template-columns: 1fr 1fr; } }
+        
+        .chart-box {
+            background: rgba(0,0,0,0.3); /* Leggermente più scuro delle card */
+            padding: 20px;
+            border-radius: 15px;
+            min-height: 250px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        #dashboardSection { display: none; animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), transparent);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,215,0,0.2);
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .stat-number { font-size: 2.5rem; font-weight: 800; text-align: center; color: var(--gold); margin: 0; text-shadow: 0 0 10px var(--gold-glow);}
+        .stat-label { text-align: center; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-top: 5px; }
         .hidden { display: none; }
+        
+        #liveFeed li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        #liveFeed b { color: var(--gold); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🥂 Capodanno Data Hub</h1>
+    <h1>✨ Capodanno 2026 ✨</h1>
+    <p style="text-align:center; color:#aaa; margin-top:-10px; margin-bottom: 30px;">L'Hub ufficiale per le tue preferenze alcoliche (e non)</p>
 
     <div id="voteSection" class="card">
-        <h2>Inserisci la tua preferenza</h2>
-        <input type="text" id="name" placeholder="Il tuo Nome" required>
+        <h2>Cosa ti versiamo?</h2>
         
-        <label>Cosa bevi?</label>
-        <select id="drink">
-            <option value="Gin Tonic">Gin Tonic</option>
-            <option value="Vodka Lemon">Vodka Lemon</option>
-            <option value="Rum">Rum</option>
-            <option value="Vino">Vino/Bollicine</option>
-            <option value="Birra">Birra</option>
-            <option value="Analcolico">Analcolico</option>
-        </select>
+        <label style="font-weight: 600; margin-left: 5px;">IL TUO NOME</label>
+        <input type="text" id="name" placeholder="Es. Mario il Devastatore" required>
+        
+        <h3>🥃 Superalcolici</h3>
+        <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Gin"><span class="checkmark">Gin</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Vodka"><span class="checkmark">Vodka</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Rum"><span class="checkmark">Rum</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Whisky"><span class="checkmark">Whisky</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Amaro"><span class="checkmark">Amaro / Shot</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Tequila"><span class="checkmark">Tequila</span></label>
+        </div>
 
-        <label>Qualità/Budget Spirit?</label>
+        <h3>🍺 Birra & Vino</h3>
+        <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Birra"><span class="checkmark">Birra 🍺</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Vino Rosso"><span class="checkmark">Vino Rosso 🍷</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Vino Bianco"><span class="checkmark">Vino Bianco 🥂</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Prosecco"><span class="checkmark">Prosecco / Bollicine 🍾</span></label>
+        </div>
+
+        <h3>🥤 Mixer & Analcolici</h3>
+        <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Tonica"><span class="checkmark">Acqua Tonica</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Lemon"><span class="checkmark">Lemon Soda</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Coca Cola"><span class="checkmark">Coca Cola</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Redbull"><span class="checkmark">Redbull</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Succo"><span class="checkmark">Succo Frutta</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="drink" value="Acqua"><span class="checkmark">Acqua (Fondamentale)</span></label>
+        </div>
+
+        <label style="margin-top:30px; display:block; font-weight: 600; margin-left: 5px;">Livello di Qualità (Budget)</label>
         <select id="quality">
-            <option value="Standard">Standard (Normale)</option>
-            <option value="Premium">Premium (+€€€)</option>
-            <option value="Scrauso">Scrauso (Risparmio)</option>
-            <option value="N/A">Non applicabile (Vino/Birra)</option>
+            <option value="Standard">⚖️ Standard (Normale)</option>
+            <option value="Premium">💎 Premium (Spendo di più)</option>
+            <option value="Scrauso">📉 Scrauso (Max Risparmio)</option>
+            <option value="N/A">🤷 Non mi interessa / Solo Birra</option>
         </select>
 
-        <button onclick="submitVote()">INVIA E VEDI GRAFICI 🚀</button>
+        <button onclick="submitVote()">CONFERMA LE SCELTE 🚀</button>
     </div>
 
     <div id="dashboardSection">
         <div class="card">
-            <h2>📊 Situazione Attuale</h2>
-            <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
-                <div>
+            <h2 style="text-shadow: 0 0 10px var(--gold-glow);">📊 Dashboard Spesa</h2>
+            <div style="display: flex; justify-content: space-around; margin-bottom: 30px;">
+                <div class="stat-box">
                     <p class="stat-number" id="totalVotes">0</p>
-                    <p class="stat-label">Partecipanti</p>
+                    <p class="stat-label">Partecipanti Totali</p>
                 </div>
-                <div>
+                <div class="stat-box">
                     <p class="stat-number" id="premiumCount">0</p>
                     <p class="stat-label">Vogliono Premium</p>
                 </div>
@@ -93,15 +245,15 @@
                 </div>
             </div>
             
-            <h3 style="margin-top:30px; border-bottom:1px solid #444; padding-bottom:10px;">Ultimi voti:</h3>
-            <ul id="liveFeed" style="list-style: none; padding: 0; color: #ccc;"></ul>
+            <h3 style="margin-top:40px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:10px;">🔴 Live Feed:</h3>
+            <ul id="liveFeed" style="list-style: none; padding: 0; color: #ccc; max-height: 250px; overflow-y: auto; scrollbar-width: thin;"></ul>
         </div>
     </div>
 </div>
 
 <script>
     // ============================================================
-    // 1. CONFIGURAZIONE FIREBASE (SOSTITUISCI QUI SOTTO!)
+    // CONFIGURAZIONE FIREBASE
     // ============================================================
     const firebaseConfig = {
         apiKey: "AIzaSyCcdhD6iOfYXgv9ifdtZzs79vHGj2e_1u4",
@@ -110,107 +262,153 @@
         storageBucket: "capodanno-da24f.firebasestorage.app",
         messagingSenderId: "498972727846",
         appId: "1:498972727846:web:0f8db4395868ad285764e7"
-        };
-    // ============================================================
+    };
 
     // Inizializza Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const collectionName = "preferenze2025";
+    // Uso una nuova collection per i test con la nuova grafica
+    const collectionName = "preferenze2026_v3_fighetto"; 
 
     // Funzione per inviare i dati
     function submitVote() {
         const name = document.getElementById('name').value;
-        const drink = document.getElementById('drink').value;
         const quality = document.getElementById('quality').value;
+        
+        const checkboxes = document.querySelectorAll('input[name="drink"]:checked');
+        let selectedDrinks = [];
+        checkboxes.forEach((checkbox) => {
+            selectedDrinks.push(checkbox.value);
+        });
 
-        if(!name) return alert("Metti il nome!");
+        if(!name) return alert("Ehy, inserisci il tuo nome!");
+        if(selectedDrinks.length === 0) return alert("Non bevi nulla? Seleziona almeno l'acqua!");
+
+        // Effetto sul bottone durante l'invio
+        const btn = document.querySelector('button');
+        btn.innerText = "INVIO IN CORSO...";
+        btn.style.opacity = "0.7";
 
         db.collection(collectionName).add({
             name: name,
-            drink: drink,
+            selections: selectedDrinks, 
             quality: quality,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
             document.getElementById('voteSection').classList.add('hidden');
             document.getElementById('dashboardSection').style.display = 'block';
+            // Scroll smooth verso la dashboard
+            document.getElementById('dashboardSection').scrollIntoView({ behavior: 'smooth' });
         }).catch((error) => {
             console.error("Errore: ", error);
-            alert("Errore nell'invio, riprova.");
+            alert("Errore nell'invio: " + error.message);
+            btn.innerText = "CONFERMA LE SCELTE 🚀";
+            btn.style.opacity = "1";
         });
     }
 
     // Funzione che ascolta i dati in TEMPO REALE
     db.collection(collectionName).orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-        let drinks = {};
+        let itemCounts = {};
         let qualities = { "Premium": 0, "Standard": 0, "Scrauso": 0 };
-        let total = 0;
+        let totalPeople = 0;
         let feedHTML = "";
 
         snapshot.forEach((doc) => {
             const data = doc.data();
-            total++;
+            totalPeople++;
 
-            // Conteggio Drink
-            drinks[data.drink] = (drinks[data.drink] || 0) + 1;
-
-            // Conteggio Qualità (se non è N/A)
             if(qualities[data.quality] !== undefined) {
                 qualities[data.quality]++;
             }
 
-            // Lista ultimi voti
-            feedHTML += `<li>🔹 <b>${data.name}</b> ha scelto ${data.drink} (${data.quality})</li>`;
+            if (data.selections && Array.isArray(data.selections)) {
+                data.selections.forEach(item => {
+                    itemCounts[item] = (itemCounts[item] || 0) + 1;
+                });
+                // Feed più carino con emoji casuali
+                const emojis = ['🥂', '🍾', '🥃', '🍸', '🍹', '🍺'];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                feedHTML += `<li>${randomEmoji} <b>${data.name}</b> ha scelto: <span style="color:#fff">${data.selections.join(", ")}</span></li>`;
+            }
         });
 
-        // Aggiorna numeri
-        document.getElementById('totalVotes').innerText = total;
+        document.getElementById('totalVotes').innerText = totalPeople;
         document.getElementById('premiumCount').innerText = qualities["Premium"];
         document.getElementById('liveFeed').innerHTML = feedHTML;
         
-        // Se c'è almeno un voto, mostra dashboard
-        if(total > 0) document.getElementById('dashboardSection').style.display = 'block';
+        if(totalPeople > 0 && document.getElementById('voteSection').classList.contains('hidden')) {
+             document.getElementById('dashboardSection').style.display = 'block';
+        }
 
-        updateCharts(drinks, qualities);
+        updateCharts(itemCounts, qualities);
     });
 
-    // Gestione Grafici Chart.js
+    // Gestione Grafici Chart.js (Stile aggiornato)
+    Chart.defaults.color = '#aaa';
+    Chart.defaults.font.family = "'Montserrat', sans-serif";
     let chartDrink, chartQuality;
 
-    function updateCharts(drinkData, qualityData) {
+    function updateCharts(itemData, qualityData) {
         const ctxD = document.getElementById('drinkChart').getContext('2d');
         const ctxQ = document.getElementById('qualityChart').getContext('2d');
 
-        // Grafico Torta Drinks
+        const sortedKeys = Object.keys(itemData).sort((a,b) => itemData[b] - itemData[a]);
+        const sortedValues = sortedKeys.map(key => itemData[key]);
+
+        // Grafico Barre Orizzontali
         if(chartDrink) chartDrink.destroy();
         chartDrink = new Chart(ctxD, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(drinkData),
-                datasets: [{
-                    data: Object.values(drinkData),
-                    backgroundColor: ['#d4af37', '#e0e0e0', '#3e95cd', '#8e5ea2', '#3cba9f', '#e8c3b9'],
-                    borderWidth: 0
-                }]
-            },
-            options: { plugins: { title: { display: true, text: 'Preferenze Drink', color: 'white' }, legend: { labels: { color: 'white' } } } }
-        });
-
-        // Grafico Barre Qualità
-        if(chartQuality) chartQuality.destroy();
-        chartQuality = new Chart(ctxQ, {
             type: 'bar',
             data: {
-                labels: Object.keys(qualityData),
+                labels: sortedKeys,
                 datasets: [{
-                    label: 'Voti Qualità',
-                    data: Object.values(qualityData),
-                    backgroundColor: ['#d4af37', '#888', '#444'], // Oro per Premium
+                    label: 'Richieste',
+                    data: sortedValues,
+                    backgroundColor: 'rgba(255, 215, 0, 0.8)', // Oro più brillante
+                    borderColor: '#ffd700',
+                    borderWidth: 1,
+                    borderRadius: 5, // Barre arrotondate
+                    hoverBackgroundColor: '#fff'
                 }]
             },
             options: { 
-                scales: { y: { beginAtZero: true, ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } },
-                plugins: { legend: { display: false }, title: { display: true, text: 'Budget / Qualità', color: 'white' } }
+                indexAxis: 'y', 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false }, 
+                    title: { display: true, text: 'TOP CONSUMI', color: '#ffd700', font: {size: 16, weight: 'bold'} } 
+                },
+                scales: { 
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' } }, 
+                    y: { grid: { display: false }, ticks: { color: 'white', font: {size: 13, weight: '600'} } } 
+                }
+            }
+        });
+
+        // Grafico Torta Qualità
+        if(chartQuality) chartQuality.destroy();
+        chartQuality = new Chart(ctxQ, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(qualityData),
+                datasets: [{
+                    data: Object.values(qualityData),
+                    backgroundColor: ['#ffd700', '#a0a0a0', '#4a4a4a'], 
+                    borderColor: '#1e1e1e',
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { position: 'bottom', labels: { color: '#ccc', padding: 20, font: {size: 12} } }, 
+                    title: { display: true, text: 'PREFERENZA BUDGET', color: '#ffd700', font: {size: 16, weight: 'bold'} } 
+                },
+                cutout: '60%' // Ciambella più sottile
             }
         });
     }
