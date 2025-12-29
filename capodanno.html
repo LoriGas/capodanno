@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capodanno Dashboard 📊</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --gold: #d4af37; --text: #eee; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        /* Stile Form */
+        .card { background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1, h2 { text-align: center; color: var(--gold); }
+        
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 15px; background: var(--gold); color: #000; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1rem; margin-top: 10px; }
+        button:hover { filter: brightness(1.1); }
+
+        /* Stile Dashboard Grafici */
+        .charts-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 600px) { .charts-container { grid-template-columns: 1fr 1fr; } }
+        
+        .chart-box { background: #2c2c2c; padding: 15px; border-radius: 10px; min-height: 250px; }
+        
+        /* Nascondi dashboard all'inizio se vuoi, oppure mostrala sempre */
+        #dashboardSection { display: none; animation: fadeIn 1s; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .stat-number { font-size: 2rem; font-weight: bold; text-align: center; color: var(--gold); margin: 0; }
+        .stat-label { text-align: center; font-size: 0.9rem; color: #aaa; margin-bottom: 15px; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🥂 Capodanno Data Hub</h1>
+
+    <div id="voteSection" class="card">
+        <h2>Inserisci la tua preferenza</h2>
+        <input type="text" id="name" placeholder="Il tuo Nome" required>
+        
+        <label>Cosa bevi?</label>
+        <select id="drink">
+            <option value="Gin Tonic">Gin Tonic</option>
+            <option value="Vodka Lemon">Vodka Lemon</option>
+            <option value="Rum">Rum</option>
+            <option value="Vino">Vino/Bollicine</option>
+            <option value="Birra">Birra</option>
+            <option value="Analcolico">Analcolico</option>
+        </select>
+
+        <label>Qualità/Budget Spirit?</label>
+        <select id="quality">
+            <option value="Standard">Standard (Normale)</option>
+            <option value="Premium">Premium (+€€€)</option>
+            <option value="Scrauso">Scrauso (Risparmio)</option>
+            <option value="N/A">Non applicabile (Vino/Birra)</option>
+        </select>
+
+        <button onclick="submitVote()">INVIA E VEDI GRAFICI 🚀</button>
+    </div>
+
+    <div id="dashboardSection">
+        <div class="card">
+            <h2>📊 Situazione Attuale</h2>
+            <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
+                <div>
+                    <p class="stat-number" id="totalVotes">0</p>
+                    <p class="stat-label">Partecipanti</p>
+                </div>
+                <div>
+                    <p class="stat-number" id="premiumCount">0</p>
+                    <p class="stat-label">Vogliono Premium</p>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-box">
+                    <canvas id="drinkChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <canvas id="qualityChart"></canvas>
+                </div>
+            </div>
+            
+            <h3 style="margin-top:30px; border-bottom:1px solid #444; padding-bottom:10px;">Ultimi voti:</h3>
+            <ul id="liveFeed" style="list-style: none; padding: 0; color: #ccc;"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. CONFIGURAZIONE FIREBASE (SOSTITUISCI QUI SOTTO!)
+    // ============================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCcdhD6iOfYXgv9ifdtZzs79vHGj2e_1u4",
+        authDomain: "capodanno-da24f.firebaseapp.com",
+        projectId: "capodanno-da24f",
+        storageBucket: "capodanno-da24f.firebasestorage.app",
+        messagingSenderId: "498972727846",
+        appId: "1:498972727846:web:0f8db4395868ad285764e7"
+        };
+    // ============================================================
+
+    // Inizializza Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const collectionName = "preferenze2025";
+
+    // Funzione per inviare i dati
+    function submitVote() {
+        const name = document.getElementById('name').value;
+        const drink = document.getElementById('drink').value;
+        const quality = document.getElementById('quality').value;
+
+        if(!name) return alert("Metti il nome!");
+
+        db.collection(collectionName).add({
+            name: name,
+            drink: drink,
+            quality: quality,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            document.getElementById('voteSection').classList.add('hidden');
+            document.getElementById('dashboardSection').style.display = 'block';
+        }).catch((error) => {
+            console.error("Errore: ", error);
+            alert("Errore nell'invio, riprova.");
+        });
+    }
+
+    // Funzione che ascolta i dati in TEMPO REALE
+    db.collection(collectionName).orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+        let drinks = {};
+        let qualities = { "Premium": 0, "Standard": 0, "Scrauso": 0 };
+        let total = 0;
+        let feedHTML = "";
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            total++;
+
+            // Conteggio Drink
+            drinks[data.drink] = (drinks[data.drink] || 0) + 1;
+
+            // Conteggio Qualità (se non è N/A)
+            if(qualities[data.quality] !== undefined) {
+                qualities[data.quality]++;
+            }
+
+            // Lista ultimi voti
+            feedHTML += `<li>🔹 <b>${data.name}</b> ha scelto ${data.drink} (${data.quality})</li>`;
+        });
+
+        // Aggiorna numeri
+        document.getElementById('totalVotes').innerText = total;
+        document.getElementById('premiumCount').innerText = qualities["Premium"];
+        document.getElementById('liveFeed').innerHTML = feedHTML;
+        
+        // Se c'è almeno un voto, mostra dashboard
+        if(total > 0) document.getElementById('dashboardSection').style.display = 'block';
+
+        updateCharts(drinks, qualities);
+    });
+
+    // Gestione Grafici Chart.js
+    let chartDrink, chartQuality;
+
+    function updateCharts(drinkData, qualityData) {
+        const ctxD = document.getElementById('drinkChart').getContext('2d');
+        const ctxQ = document.getElementById('qualityChart').getContext('2d');
+
+        // Grafico Torta Drinks
+        if(chartDrink) chartDrink.destroy();
+        chartDrink = new Chart(ctxD, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(drinkData),
+                datasets: [{
+                    data: Object.values(drinkData),
+                    backgroundColor: ['#d4af37', '#e0e0e0', '#3e95cd', '#8e5ea2', '#3cba9f', '#e8c3b9'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { title: { display: true, text: 'Preferenze Drink', color: 'white' }, legend: { labels: { color: 'white' } } } }
+        });
+
+        // Grafico Barre Qualità
+        if(chartQuality) chartQuality.destroy();
+        chartQuality = new Chart(ctxQ, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(qualityData),
+                datasets: [{
+                    label: 'Voti Qualità',
+                    data: Object.values(qualityData),
+                    backgroundColor: ['#d4af37', '#888', '#444'], // Oro per Premium
+                }]
+            },
+            options: { 
+                scales: { y: { beginAtZero: true, ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } },
+                plugins: { legend: { display: false }, title: { display: true, text: 'Budget / Qualità', color: 'white' } }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
